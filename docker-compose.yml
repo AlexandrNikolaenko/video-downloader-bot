@@ -1,0 +1,9 @@
+networks:
+  dev:
+
+services:
+
+  backend:
+    build: .
+    networks:
+      - dev
