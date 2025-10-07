@@ -8,6 +8,7 @@ const path = require('path');
 require('dotenv').config();
 const pTimeout = require('p-timeout');
 const play = require('play-dl');
+const { message } = require('telegraf/filters');
 
 const bot = new Telegraf(process.env.token);
 
@@ -69,7 +70,7 @@ async function downloadYoutube (url) {
       },
     });
   }
-  
+  console.log(result.status);
   const data = (await result.json());
   return data.file; // mp4
 }
@@ -112,9 +113,14 @@ bot.on('text', async (ctx) => {
       response.data.pipe(writer);
 
       writer.on('finish', async () => {
-        await ctx.replyWithDocument({ source: filePath });
-        // await ctx.replyWithVideo({ source: filePath });
+        try {
+          await ctx.replyWithDocument({ source: filePath });
+        } catch (err) {
+          await ctx.reply('Это видео слишком большое');
+        }
+        console.log('here');
         clearInterval(interval);
+        console.log('here1');
         if (filePath) {
           fs.unlink(filePath, () => {});
         }
