@@ -21,6 +21,7 @@ async function downloadTikTok(url) {
       'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
     },
   });
+  console.log(result);
   const data = (await result.json());
   return data.downloadUrl; // mp4
 }
@@ -70,7 +71,6 @@ async function downloadYoutube (url) {
       },
     });
   }
-  console.log(result.status);
   const data = (await result.json());
   return data.file; // mp4
 }
@@ -78,10 +78,10 @@ async function downloadYoutube (url) {
 bot.start((ctx) => ctx.reply(
   '👋 Привет, ' + ctx.from.first_name + '! Я помогу тебе скачать видео.\n\n' +
     'Отправь мне ссылку на ролик с:\n' +
-    '▶️ YouTube\n' +
-    '🎵 TikTok\n' +
-    '📸 Instagram\n' +
-    '📌 Pinterest\n\n' +
+    '▶️ YouTube в формате youtube.com или youtu.be\n' +
+    '🎵 TikTok в формате www.tiktok.com (чтобы получить такю ссылку откройте видео в браузере и скопируйте URL)\n' +
+    '📸 Instagram в формате www.instagram.com\n' +
+    '📌 Pinterest в формате pinterest.com или pin.it\n\n' +
     'Я подготовлю файл и пришлю его прямо сюда. 🚀'
   ));
 
@@ -96,12 +96,16 @@ bot.on('text', async (ctx) => {
   try {
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       videoUrl = await downloadYoutube(url);
+      console.log(videoUrl);
     } else if (url.includes('tiktok')) {
       videoUrl = await downloadTikTok(url);
+      console.log(videoUrl);
     } else if (url.includes('instagram')) {
       videoUrl = await downloadInstagram(url);
+      console.log(videoUrl);
     } else if (url.includes('pinterest') || url.includes('pin.it')) {
       videoUrl = await downloadPinterest(url);
+      console.log(videoUrl);
     } else {
       return ctx.reply('❌ Поддерживаются только YouTube, TikTok, Instagram и Pinterest.');
     }
@@ -118,22 +122,24 @@ bot.on('text', async (ctx) => {
         } catch (err) {
           await ctx.reply('Это видео слишком большое');
         }
-        console.log('here');
         clearInterval(interval);
-        console.log('here1');
         if (filePath) {
           fs.unlink(filePath, () => {});
         }
       })
       writer.on('error', (err) => new Error(err))
+    } else {
+      return await ctx.reply('❌ Видео по данной ссылке не найдено')
     }
   } catch (err) {
     console.log(err.message.code);
-    ctx.reply('⚠️ Ошибка при скачивании видео.');
+    await ctx.reply('⚠️ Ошибка при скачивании видео.');
     clearInterval(interval);
     if (filePath) {
       fs.unlink(filePath, () => {});
     }
+  } finally {
+    clearInterval(interval);
   }
 });
 
