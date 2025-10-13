@@ -14,65 +14,103 @@ const bot = new Telegraf(process.env.token);
 
 // ===== API-шки для сторонних сервисов =====
 async function downloadTikTok(url) {
-  const result = await fetch(`https://tiktok-video-downloader-api.p.rapidapi.com/media?videoUrl=${encodeURIComponent(url)}`, {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
-      'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
-    },
-  });
-  console.log(result);
-  const data = (await result.json());
-  return data.downloadUrl; // mp4
+  try {
+    const result = await fetch(`https://tiktok-video-downloader-api.p.rapidapi.com/media?videoUrl=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
+        'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
+      },
+      signal: AbortSignal.timeout(30000),
+    });
+    console.log(url, result.status);
+    if (result.status == 200) {
+      const data = (await result.json());
+      return data.downloadUrl; // mp4
+    } else return new Error('api недоступно')
+  } catch(err) {
+    console.log(err);
+    return new Error('api недоступно');
+  }
 }
 
 async function downloadInstagram(url) {
-  const result = await fetch(`https://instagram-reels-downloader-api.p.rapidapi.com/download?url=${encodeURIComponent(url)}`, {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
-      'x-rapidapi-host': 'instagram-reels-downloader-api.p.rapidapi.com',
-    },
-  });
-  const data = (await result.json());
-  return data.data.medias[0].url; // mp4
+  try {
+    const result = await fetch(`https://instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com/convert?url=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
+        'x-rapidapi-host': 'instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com',
+      },
+      signal: AbortSignal.timeout(30000),
+    });
+    console.log(url, result.status);
+    if (result.status == 200) {
+      const data = (await result.json());
+      return data.media[0].url; // mp4
+    } else return new Error('api недоступно')
+  } catch(err) {
+    console.log(err);
+    return new Error('api недоступно')
+  }
 }
 
 async function downloadPinterest(url) {
-  const result = await fetch(`https://pinterest-video-and-image-downloader.p.rapidapi.com/pinterest?url=${encodeURIComponent(url)}`, {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
-      'x-rapidapi-host': 'pinterest-video-and-image-downloader.p.rapidapi.com',
-    },
-  });
-  const data = (await result.json());
-  return data.data.url; // mp4
+  try {
+    const result = await fetch(`https://pinterest-video-and-image-downloader.p.rapidapi.com/pinterest?url=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
+        'x-rapidapi-host': 'pinterest-video-and-image-downloader.p.rapidapi.com',
+      },
+      signal: AbortSignal.timeout(30000),
+    });
+    console.log(url, result.status);
+    if (result.status == 200) {
+      const data = (await result.json());
+      return data.data.url; // mp4
+    } else return new Error('api недоступно')
+  } catch(err) {
+    console.log(err);
+    return new Error('api недоступно')
+  }
 }
 
 async function downloadYoutube (url) {
   const path = url.split('/');
   let result;
-  if (path[path.length - 2] == 'shorts') {
-    result = await fetch(`https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_short/${path[path.length - 1].split("?")[0]}?quality=247`, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
-        'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com',
-      },
-    });
-  } else {
-    const id = path[path.length - 1].split('=')[1];
-    result = await fetch(`https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_video/${id}?quality=247`, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
-        'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com',
-      },
-    });
+  try {
+    if (path[path.length - 2] == 'shorts') {
+      result = await fetch(`https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_short/${path[path.length - 1].split("?")[0]}?quality=247`, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
+          'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com',
+        },
+        signal: AbortSignal.timeout(30000),
+      });
+    } else {
+      const id = path[path.length - 1].split('=')[1];
+      result = await fetch(`https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_video/${id}?quality=247`, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
+          'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com',
+        },
+        signal: AbortSignal.timeout(30000),
+      });
+    }
+  
+    console.log(url, result.status);
+    if (result.status == 200) {
+      const data = (await result.json());
+      return data.file; // mp4
+    } else return new Error('api недоступно');
+  } catch(err) {
+    console.log(err);
+    return new Error('api недоступно');
   }
-  const data = (await result.json());
-  return data.file; // mp4
+
 }
 
 bot.start((ctx) => ctx.reply(
@@ -88,8 +126,8 @@ bot.start((ctx) => ctx.reply(
 bot.on('text', async (ctx) => {
   const url = ctx.message.text;
   await ctx.reply('⏳ Скачиваю видео...');
-  const interval = setInterval(() => {
-    ctx.reply('Отправляю видео...')
+  const interval = setInterval(async () => {
+    await ctx.reply('Отправляю видео...')
   }, 60000)
 
   let videoUrl, filePath;
@@ -132,9 +170,8 @@ bot.on('text', async (ctx) => {
       return await ctx.reply('❌ Видео по данной ссылке не найдено')
     }
   } catch (err) {
-    console.log(err.message.code);
+    console.log(err);
     await ctx.reply('⚠️ Ошибка при скачивании видео.');
-    clearInterval(interval);
     if (filePath) {
       fs.unlink(filePath, () => {});
     }
