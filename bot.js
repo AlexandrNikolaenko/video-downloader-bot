@@ -21,7 +21,7 @@ async function downloadTikTok(url) {
         'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
         'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
       },
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(60000),
     });
     console.log(url, result.status);
     if (result.status == 200) {
@@ -42,7 +42,7 @@ async function downloadInstagram(url) {
         'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
         'x-rapidapi-host': 'instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com',
       },
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(60000),
     });
     console.log(url, result.status);
     if (result.status == 200) {
@@ -63,7 +63,7 @@ async function downloadPinterest(url) {
         'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
         'x-rapidapi-host': 'pinterest-video-and-image-downloader.p.rapidapi.com',
       },
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(60000),
     });
     console.log(url, result.status);
     if (result.status == 200) {
@@ -87,7 +87,7 @@ async function downloadYoutube (url) {
           'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
           'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com',
         },
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(60000),
       });
     } else {
       const id = path[path.length - 1].split('=')[1];
@@ -97,7 +97,7 @@ async function downloadYoutube (url) {
           'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
           'x-rapidapi-host': 'youtube-video-fast-downloader-24-7.p.rapidapi.com',
         },
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(60000),
       });
     }
   
