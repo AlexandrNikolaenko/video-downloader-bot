@@ -15,18 +15,18 @@ const bot = new Telegraf(process.env.token);
 // ===== API-шки для сторонних сервисов =====
 async function downloadTikTok(url) {
   try {
-    const result = await fetch(`https://tiktok-video-downloader-api.p.rapidapi.com/media?videoUrl=${encodeURIComponent(url)}`, {
+    const result = await fetch(`https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/rich_response/index?url=${encodeURIComponent(url)}`, {
       method: 'GET',
       headers: {
         'x-rapidapi-key': '3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee',
-        'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
+        'x-rapidapi-host': 'tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com',
       },
       signal: AbortSignal.timeout(60000),
     });
     console.log(url, result.status);
     if (result.status == 200) {
       const data = (await result.json());
-      return data.downloadUrl; // mp4
+      return data.video[0]; // mp4
     } else return new Error('api недоступно')
   } catch(err) {
     console.log(err);
@@ -117,7 +117,7 @@ bot.start((ctx) => ctx.reply(
   '👋 Привет, ' + ctx.from.first_name + '! Я помогу тебе скачать видео.\n\n' +
     'Отправь мне ссылку на ролик с:\n' +
     '▶️ YouTube в формате youtube.com или youtu.be\n' +
-    '🎵 TikTok в формате www.tiktok.com (чтобы получить такую ссылку, откройте видео по ссылке из приложения в браузере и скопируйте URL)\n' +
+    '🎵 TikTok в формате www.tiktok.com и vt.tiktok.com\n' +
     '📸 Instagram в формате www.instagram.com\n' +
     '📌 Pinterest в формате pinterest.com или pin.it\n\n' +
     'Я подготовлю файл и пришлю его прямо сюда. 🚀'
