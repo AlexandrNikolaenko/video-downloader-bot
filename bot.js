@@ -1,14 +1,8 @@
 const { Telegraf } = require('telegraf');
 const axios = require('axios');
-const ytdl = require('ytdl-core');
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-const pTimeout = require('p-timeout');
-const play = require('play-dl');
-const { message } = require('telegraf/filters');
 
 const bot = new Telegraf(process.env.token);
 
@@ -114,13 +108,15 @@ async function downloadYoutube (url) {
 }
 
 bot.start((ctx) => ctx.reply(
-  '👋 Привет, ' + ctx.from.first_name + '! Я помогу тебе скачать видео.\n\n' +
-    'Отправь мне ссылку на ролик с:\n' +
-    '▶️ YouTube в формате youtube.com или youtu.be\n' +
-    '🎵 TikTok в формате www.tiktok.com и vt.tiktok.com\n' +
-    '📸 Instagram в формате www.instagram.com\n' +
-    '📌 Pinterest в формате pinterest.com или pin.it\n\n' +
-    'Я подготовлю файл и пришлю его прямо сюда. 🚀'
+  'Привет, @' + ctx.from.username + '! \n' +
+'Я помогаю скачать видео без водяного знака и в хорошем качестве из TikTok, Instagram, YouTube Shorts и Pinterest. \n \n' +
+
+'<i>Присылай ссылку на ролик и через мгновение получишь видео без водяного знака.</i> \n \n'+
+
+'Если возникла техническая ошибка, пиши сюда — @AliBabagg. \n'+
+'<b>Исправим как можно скорее!</b> \n', {
+  parse_mode: 'HTML'
+}
   ));
 
 bot.on('text', async (ctx) => {
@@ -156,9 +152,9 @@ bot.on('text', async (ctx) => {
 
       writer.on('finish', async () => {
         try {
-          await ctx.replyWithDocument({ source: filePath });
+          await ctx.replyWithDocument({ source: filePath }, { caption: `Видео скачано с помощью @${ctx.botInfo.username || 'my_bot'} 😍` });
         } catch (err) {
-          await ctx.reply('Это видео слишком большое');
+          await ctx.reply('Это видео слишком большое, попробуйте еще раз или скачайте видео по этой ссылке ' + videoUrl);
         }
         clearInterval(interval);
         if (filePath) {
