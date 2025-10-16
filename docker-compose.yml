@@ -2,7 +2,6 @@ networks:
   dev:
 
 services:
-
   backend:
     build: .
     networks:
