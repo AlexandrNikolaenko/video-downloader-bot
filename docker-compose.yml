@@ -5,6 +5,7 @@ services:
     build: .
     container_name: backend
     restart: unless-stopped
+    network_mode: "host"
     env_file:
       - .env
     environment:
@@ -15,11 +16,3 @@ services:
       DB_NAME: ${DB_NAME}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - backend-net
-    ports:
-      - "8000:8000" # если нужен доступ к API бота снаружи
-
-networks:
-  backend-net:
-    driver: bridge
