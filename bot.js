@@ -125,7 +125,7 @@ bot.on("text", async (ctx) => {
 
       writer.on("finish", async () => {
         try {
-          await ctx.replyWithDocument(
+          await ctx.replyWithVideo(
             { source: filePath },
             {
               caption: `Видео скачано с помощью @${ctx.botInfo.username || "my_bot"} 😍`,
