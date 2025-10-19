@@ -13,7 +13,7 @@ const ADMIN_ID = parseInt(process.env.ADMIN_ID, 10);
 const DEVELOPER_ID = parseInt(process.env.DEVELOPER_ID, 10);
 
 bot.start(async (ctx) => {
-  await saveUser(ctx);
+  await pool.saveUser(ctx);
   await ctx.reply(
     "👋 Привет, @" +
       ctx.from.username +
@@ -41,7 +41,7 @@ bot.start(async (ctx) => {
 });
 
 bot.hears('📘 Инструкция',  async (ctx) => {
-  await saveUser(ctx);
+  await pool.saveUser(ctx);
   const instruction = `📘 <b>Как пользоваться ботом:</b>
 
 1️⃣ Найди видео в TikTok, Instagram, YouTube Shorts или Pinterest.  
@@ -55,7 +55,7 @@ bot.hears('📘 Инструкция',  async (ctx) => {
 });
 
 bot.action('how_to_use', async (ctx) => {
-  await saveUser(ctx);
+  await pool.saveUser(ctx);
   await ctx.answerCbQuery();
 
   const instruction = `📘 <b>Как пользоваться ботом:</b>
