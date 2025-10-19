@@ -6,3 +6,5 @@ services:
     build: .
     networks:
       - dev
+    env_file:
+      - .env

@@ -2,136 +2,18 @@ const { Telegraf, Markup } = require("telegraf");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const api = require('./api/api.js');
+const pool = require('./api/db.js');
 require("dotenv").config();
 
 const bot = new Telegraf(process.env.token);
 
-// ===== API-шки для сторонних сервисов =====
-async function downloadTikTok(url) {
-  try {
-    const result = await fetch(
-      `https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/rich_response/index?url=${encodeURIComponent(url)}`,
-      {
-        method: "GET",
-        headers: {
-          "x-rapidapi-key":
-            "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
-          "x-rapidapi-host":
-            "tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com",
-        },
-        signal: AbortSignal.timeout(60000),
-      },
-    );
-    console.log(url, result.status);
-    if (result.status == 200) {
-      const data = await result.json();
-      return data.video[0]; // mp4
-    } else return new Error("api недоступно");
-  } catch (err) {
-    console.log(err);
-    return new Error("api недоступно");
-  }
-}
-
-async function downloadInstagram(url) {
-  try {
-    const result = await fetch(
-      `https://instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com/convert?url=${encodeURIComponent(url)}`,
-      {
-        method: "GET",
-        headers: {
-          "x-rapidapi-key":
-            "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
-          "x-rapidapi-host":
-            "instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com",
-        },
-        signal: AbortSignal.timeout(60000),
-      },
-    );
-    console.log(url, result.status);
-    if (result.status == 200) {
-      const data = await result.json();
-      return data.media[0].url; // mp4
-    } else return new Error("api недоступно");
-  } catch (err) {
-    console.log(err);
-    return new Error("api недоступно");
-  }
-}
-
-async function downloadPinterest(url) {
-  try {
-    const result = await fetch(
-      `https://pinterest-video-and-image-downloader.p.rapidapi.com/pinterest?url=${encodeURIComponent(url)}`,
-      {
-        method: "GET",
-        headers: {
-          "x-rapidapi-key":
-            "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
-          "x-rapidapi-host":
-            "pinterest-video-and-image-downloader.p.rapidapi.com",
-        },
-        signal: AbortSignal.timeout(60000),
-      },
-    );
-    console.log(url, result.status);
-    if (result.status == 200) {
-      const data = await result.json();
-      return data.data.url; // mp4
-    } else return new Error("api недоступно");
-  } catch (err) {
-    console.log(err);
-    return new Error("api недоступно");
-  }
-}
-
-async function downloadYoutube(url) {
-  const path = url.split("/");
-  let result;
-  try {
-    if (path[path.length - 2] == "shorts") {
-      result = await fetch(
-        `https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_short/${path[path.length - 1].split("?")[0]}?quality=247`,
-        {
-          method: "GET",
-          headers: {
-            "x-rapidapi-key":
-              "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
-            "x-rapidapi-host":
-              "youtube-video-fast-downloader-24-7.p.rapidapi.com",
-          },
-          signal: AbortSignal.timeout(60000),
-        },
-      );
-    } else {
-      const id = path[path.length - 1].split("=")[1];
-      result = await fetch(
-        `https://youtube-video-fast-downloader-24-7.p.rapidapi.com/download_video/${id}?quality=247`,
-        {
-          method: "GET",
-          headers: {
-            "x-rapidapi-key":
-              "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
-            "x-rapidapi-host":
-              "youtube-video-fast-downloader-24-7.p.rapidapi.com",
-          },
-          signal: AbortSignal.timeout(60000),
-        },
-      );
-    }
-
-    console.log(url, result.status);
-    if (result.status == 200) {
-      const data = await result.json();
-      return data.file; // mp4
-    } else return new Error("api недоступно");
-  } catch (err) {
-    console.log(err);
-    return new Error("api недоступно");
-  }
-}
+// ========== Команда рассылки (только админ) ==========
+const ADMIN_ID = parseInt(process.env.ADMIN_ID, 10);
+const DEVELOPER_ID = parseInt(process.env.DEVELOPER_ID, 10);
 
 bot.start(async (ctx) => {
+  await saveUser(ctx);
   await ctx.reply(
     "👋 Привет, @" +
       ctx.from.username +
@@ -159,6 +41,7 @@ bot.start(async (ctx) => {
 });
 
 bot.hears('📘 Инструкция',  async (ctx) => {
+  await saveUser(ctx);
   const instruction = `📘 <b>Как пользоваться ботом:</b>
 
 1️⃣ Найди видео в TikTok, Instagram, YouTube Shorts или Pinterest.  
@@ -172,6 +55,7 @@ bot.hears('📘 Инструкция',  async (ctx) => {
 });
 
 bot.action('how_to_use', async (ctx) => {
+  await saveUser(ctx);
   await ctx.answerCbQuery();
 
   const instruction = `📘 <b>Как пользоваться ботом:</b>
@@ -184,9 +68,21 @@ bot.action('how_to_use', async (ctx) => {
 ❗Если видео слишком большое или не загружается — попробуй позже или напиши в поддержку.`;
 
   await ctx.reply(instruction, { parse_mode: 'HTML',  });
-})
+});
+
+// Храним состояние, ждём сообщение для рассылки
+let waitingForBroadcast = false;
+
+// Команда для старта рассылки
+bot.command('broadcast', async (ctx) => {
+  if (ctx.from.id !== ADMIN_ID) return;
+  waitingForBroadcast = true;
+  await ctx.reply('📣 Отправь сообщение, которое нужно разослать (может быть текст, фото, видео, документ, сообщение с кнопками).');
+});
+
 
 bot.on("text", async (ctx) => {
+  await pool.saveUser(ctx);
   console.log(ctx.from.id);
   const url = ctx.message.text;
   await ctx.reply("⏳ Скачиваю видео...");
@@ -197,16 +93,16 @@ bot.on("text", async (ctx) => {
   let videoUrl, filePath;
   try {
     if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      videoUrl = await downloadYoutube(url);
+      videoUrl = await api.downloadYoutube(url);
       console.log(videoUrl);
     } else if (url.includes("tiktok")) {
-      videoUrl = await downloadTikTok(url);
+      videoUrl = await api.downloadTikTok(url);
       console.log(videoUrl);
     } else if (url.includes("instagram")) {
-      videoUrl = await downloadInstagram(url);
+      videoUrl = await api.downloadInstagram(url);
       console.log(videoUrl);
     } else if (url.includes("pinterest") || url.includes("pin.it")) {
-      videoUrl = await downloadPinterest(url);
+      videoUrl = await api.downloadPinterest(url);
       console.log(videoUrl);
     } else {
       return ctx.reply(
@@ -261,4 +157,52 @@ bot.on("text", async (ctx) => {
   }
 });
 
-bot.launch();
+// При получении любого сообщения проверяем, ждёт ли админ рассылку
+bot.on('message', async (ctx) => {
+  if ((ctx.from.id == ADMIN_ID || ctx.from.id == DEVELOPER_ID) && waitingForBroadcast) {
+    waitingForBroadcast = false;
+
+    broadcastInBackground(ctx);
+  }
+});
+
+async function broadcastInBackground(ctx) {
+  try {
+    const [chats] = await pool.getAllChats();
+    let sent = 0, removed = 0, failed = 0;
+
+    // не блокируем event loop
+    setImmediate(async () => {
+      for (const chat of chats) {
+        try {
+          await ctx.telegram.copyMessage(
+            chat.chat_id,
+            ctx.chat.id,
+            ctx.message.message_id
+          );
+          sent++;
+        } catch (err) {
+          if (err.response?.error_code === 403) {
+            removed++;
+            await pool.deleteChat(chat.chat_id);
+          } else {
+            failed++;
+          }
+        }
+
+        // немного спим, чтобы избежать flood limit
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      await ctx.telegram.sendMessage(
+        ctx.chat.id,
+        `✅ Рассылка завершена.\n\n📨 Успешно: ${sent}\n🚫 Удалено: ${removed}\n⚠️ Ошибок: ${failed}`
+      );
+    });
+  } catch (err) {
+    console.error("Ошибка при рассылке:", err);
+    await ctx.reply("⚠️ Ошибка при запуске рассылки.");
+  }
+}
+
+bot.launch().catch(() => waitingForBroadcast = false);
