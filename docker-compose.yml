@@ -1,18 +1,25 @@
-version: '3.9'
+version: "3.9"
 
 services:
   backend:
     build: .
+    container_name: backend
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
+      # Эти переменные можно переопределить через .env
       DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASS}
       DB_NAME: ${DB_NAME}
-    ports:
-      - "5000:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
-      - default
+      - backend-net
+    ports:
+      - "8000:8000" # если нужен доступ к API бота снаружи
 
 networks:
-  default:
+  backend-net:
     driver: bridge
