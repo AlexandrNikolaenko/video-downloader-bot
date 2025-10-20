@@ -75,7 +75,7 @@ let waitingForBroadcast = false;
 
 // Команда для старта рассылки
 bot.command('broadcast', async (ctx) => {
-  if (ctx.from.id !== ADMIN_ID) return;
+  if (ctx.from.id !== ADMIN_ID && ctx.from.id !== DEVELOPER_ID) return;
   waitingForBroadcast = true;
   await ctx.reply('📣 Отправь сообщение, которое нужно разослать (может быть текст, фото, видео, документ, сообщение с кнопками).');
 });
