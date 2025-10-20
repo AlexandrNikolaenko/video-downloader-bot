@@ -185,7 +185,9 @@ async function broadcastInBackground(ctx) {
           if (err.response?.error_code === 403) {
             removed++;
             await pool.deleteChat(chat.chat_id);
+            console.log('user deleted: '+chat.chat_id);
           } else {
+            console.log(err);
             failed++;
           }
         }
