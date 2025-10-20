@@ -14,7 +14,7 @@ class API {
           method: "GET",
           headers: {
             "x-rapidapi-key":
-              "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
+              this.api_key,
             "x-rapidapi-host":
               "tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com",
           },
@@ -40,7 +40,7 @@ class API {
           method: "GET",
           headers: {
             "x-rapidapi-key":
-              "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
+              this.api_key,
             "x-rapidapi-host":
               "instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com",
           },
@@ -66,7 +66,7 @@ class API {
           method: "GET",
           headers: {
             "x-rapidapi-key":
-              "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
+              this.api_key,
             "x-rapidapi-host":
               "pinterest-video-and-image-downloader.p.rapidapi.com",
           },
@@ -95,7 +95,7 @@ class API {
             method: "GET",
             headers: {
               "x-rapidapi-key":
-                "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
+                this.api_key,
               "x-rapidapi-host":
                 "youtube-video-fast-downloader-24-7.p.rapidapi.com",
             },
@@ -110,7 +110,7 @@ class API {
             method: "GET",
             headers: {
               "x-rapidapi-key":
-                "3db90c491dmshbcd9b9306cd665ap15ce25jsneeded7be80ee",
+                this.api_key,
               "x-rapidapi-host":
                 "youtube-video-fast-downloader-24-7.p.rapidapi.com",
             },
