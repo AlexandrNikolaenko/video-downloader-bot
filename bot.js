@@ -82,6 +82,12 @@ bot.command('broadcast', async (ctx) => {
 
 
 bot.on("text", async (ctx) => {
+  if ((ctx.from.id == ADMIN_ID || ctx.from.id == DEVELOPER_ID) && waitingForBroadcast) {
+    waitingForBroadcast = false;
+
+    broadcastInBackground(ctx);
+    return;
+  }
   await pool.saveUser(ctx);
   console.log(ctx.from.id);
   const url = ctx.message.text;
@@ -89,6 +95,7 @@ bot.on("text", async (ctx) => {
   const interval = setInterval(async () => {
     await ctx.reply("Отправляю видео...");
   }, 60000);
+  setTimeout(() => clearInterval(interval), 180000);
 
   let videoUrl, filePath;
   try {
@@ -175,12 +182,24 @@ async function broadcastInBackground(ctx) {
     setImmediate(async () => {
       for (const chat of chats) {
         try {
-          await ctx.telegram.copyMessage(
+          const msg = await ctx.telegram.copyMessage(
             chat.chat_id,
             ctx.chat.id,
             ctx.message.message_id
           );
           sent++;
+
+          setTimeout(async () => {
+            try {
+              await ctx.telegram.deleteMessage(chat.chat_id, msg.message_id);
+              console.log(`🗑️ Удалено сообщение у ${chat.chat_id}`);
+            } catch (err) {
+              // 400 — сообщение уже удалено или истёк срок хранения
+              if (err.response?.error_code !== 400) {
+                console.log(`⚠️ Ошибка удаления у ${chat.chat_id}: ${err.message}`);
+              }
+            }
+          }, 24 * 60 * 60 * 1000);
         } catch (err) {
           if (err.response?.error_code === 403) {
             removed++;

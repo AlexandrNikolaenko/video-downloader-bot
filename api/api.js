@@ -83,6 +83,53 @@ class API {
       return new Error("api недоступно");
     }
   }
+
+  // async downloadYoutube(url) {
+  //   const path = url.split("/");
+  //   let result;
+  //   try {
+  //     if (path[path.length - 2] == "shorts") {
+  //       result = await fetch(
+  //         `https://yt-api.p.rapidapi.com/dl?id=${path[path.length - 1].split("?")[0]}&cgeo=NL`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "x-rapidapi-key":
+  //               this.api_key,
+  //             "x-rapidapi-host":
+  //               "yt-api.p.rapidapi.com",
+  //           },
+  //           signal: AbortSignal.timeout(60000),
+  //         },
+  //       );
+  //     } else {
+  //       const id = path[path.length - 1].split("=")[1];
+  //       console.log(id);
+  //       result = await fetch(
+  //         `https://yt-api.p.rapidapi.com/dl?id=${id}&cgeo=NL`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "x-rapidapi-key":
+  //               this.api_key,
+  //             "x-rapidapi-host":
+  //               "yt-api.p.rapidapi.com",
+  //           },
+  //           signal: AbortSignal.timeout(60000),
+  //         },
+  //       );
+  //     }
+  
+  //     console.log(url, result.status);
+  //     if (result.status == 200) {
+  //       const data = await result.json();
+  //       return data.adaptiveFormats[0].url; // mp4
+  //     } else return new Error("api недоступно");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return new Error("api недоступно");
+  //   }
+  // }
   
   async downloadYoutube(url) {
     const path = url.split("/");
